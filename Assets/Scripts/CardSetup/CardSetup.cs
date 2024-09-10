@@ -1,43 +1,31 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-[Serializable]
-struct CardInfo
-{
-    public int num;
-}
-enum Suit
-{
-    Diamonds,
-    Clubs,
-    Hearths,
-    Spades
-}
 
 public class CardSetup : MonoBehaviour
 {
+    private float offsetX = .137f;
+    private float offsetY = .51f;
+
     [SerializeField]
-    private CardInfo cardInfo;
+    private int num;
 
-    private void Awake()
+    private float startOffsetX = -0.32f;
+    private float startOffsetY = -0.37f;
+
+    public void Init(int InNum)
     {
-        MeshRenderer meshRender = GetComponent<MeshRenderer>();
-        meshRender.materials[0].SetTextureOffset("Offset", new Vector2(10, 10));
-    }
+        num = InNum;
 
+        Renderer renderer = GetComponent<Renderer>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+        if (renderer != null)
+        {
+            Material material = renderer.material;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            int column = num  % 7;
+            int row = num  / 7;
+            material.mainTextureOffset = new Vector2(startOffsetX + column * offsetX, startOffsetY + row * offsetY);
+        }
     }
 }
