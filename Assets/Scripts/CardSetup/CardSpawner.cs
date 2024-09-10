@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 
 public class CardSpawner : MonoBehaviour
 {
@@ -12,7 +11,7 @@ public class CardSpawner : MonoBehaviour
 
     private void Start()
     {
-        CustomLibrary.GetGameManager().StartGameCallback += Init;
+        GameManager.StartGameCallback += Init;
     }
 
     private void Init()
@@ -44,10 +43,4 @@ public class CardSpawner : MonoBehaviour
     {
         CustomLibrary.Shuffle(ref cards);
     }
-}
-
-public class ArrayUtilities
-{
-    
-
 }
