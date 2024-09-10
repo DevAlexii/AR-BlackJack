@@ -6,14 +6,14 @@ public class CardSpawner : MonoBehaviour
     [SerializeField]
     private GameObject[] cardsType;
 
-    private GameObject[] cards;
+    private GameObject[] cards  = new GameObject[52];
 
     [SerializeField]
     private float offsetY;
 
     //TextureOffset Setting
-    private float tileOffsetX = .137f; 
-    private float tileOffsetY = .51f; 
+    private float tileOffsetX = .137f;
+    private float tileOffsetY = .51f;
     private float startTileOffsetX = -0.32f;
     private float startTileOffsetY = -0.37f;
 
@@ -25,15 +25,20 @@ public class CardSpawner : MonoBehaviour
 
     private void Init()
     {
-        //Create array with lenght 52 as number full french cards
-        cards = new GameObject[52];
+        if (cards[0])
+        {
+            for (int i = 0; i < cards.Length; ++i)
+            {
+                Destroy(cards[i]);
+            } 
+        }
 
         int cardIndex = 0;
 
         for (int i = 0; i < 52; i++)
         {
             //Change cardtype to spawn when full suit card are spawned
-            if( i % 13 == 0)
+            if (i % 13 == 0)
             {
                 ++cardIndex;
             }
