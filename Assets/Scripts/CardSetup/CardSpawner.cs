@@ -10,7 +10,12 @@ public class CardSpawner : MonoBehaviour
     [SerializeField]
     private float offsetY;
 
-    private void Awake()
+    private void Start()
+    {
+        CustomLibrary.GetGameManager().StartGameCallback += Init;
+    }
+
+    private void Init()
     {
         cards = new GameObject[52];
 
@@ -37,29 +42,12 @@ public class CardSpawner : MonoBehaviour
     }
     public void ShuffleCards()
     {
-        ArrayUtilities.Shuffle(ref cards);
+        CustomLibrary.Shuffle(ref cards);
     }
 }
 
 public class ArrayUtilities
 {
-    public static void Shuffle(ref GameObject[] array)
-    {
-        System.Random rng = new System.Random();
-        int n = array.Length;
-
-        for (int i = n - 1; i > 0; i--)
-        {
-            int j = rng.Next(0, i + 1);
-
-            GameObject temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
-
-            Vector3 tempPos = array[i].transform.position;
-            array[i].transform.position = array[j].transform.position;
-            array[j].transform.position = tempPos;
-        }
-    }
+    
 
 }
