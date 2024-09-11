@@ -36,6 +36,7 @@ public class CardSpawner : MonoBehaviour
                 Destroy(originalDeck[i]);
             } 
         }
+        currentDeck.Clear();
 
         int cardIndex = 0;
 

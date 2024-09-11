@@ -15,6 +15,7 @@ public class MainMenu : MonoBehaviour
     {
         //Call start game
         GameManager.StartGameCallback?.Invoke();
+        Time.timeScale = 1;
     }
     public void Quit()
     {
@@ -43,8 +44,8 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void TooglePause()
+    public void SetPause(int timeScale)
     {
-        Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+        Time.timeScale = timeScale;
     }
 }

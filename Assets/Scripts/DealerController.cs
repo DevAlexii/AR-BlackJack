@@ -1,10 +1,14 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DealerController : MonoBehaviour
 {
     [SerializeField]
     Transform cardPoint;
+
+    [SerializeField]
+    GameObject chooseWinnerBtn;
 
     private Collider colliderRef;
 
@@ -18,6 +22,8 @@ public class DealerController : MonoBehaviour
     private bool myTurn = true;
     int receivedCards = 0;
     bool startDraw = true;
+    int currentNumCard;
+    bool canSelectWinner;
 
     private void Start()
     {
@@ -25,8 +31,21 @@ public class DealerController : MonoBehaviour
         GameManager.ChangeTurnCallback += OnChangeTurn;
         GameManager.StopDragPlayerCallback += OnForceStopDrag;
         GameManager.DelearReceiverCallback += OnDelearReceiver;
+        GameManager.EnableChooseWinnerCallback += OnEnableChooseWinenr;
+        chooseWinnerBtn.GetComponent<Button>().onClick.AddListener(OnChooseWinnerClick);
         colliderRef = GetComponent<Collider>();
         colliderRef.enabled = false;
+    }
+
+    private void OnEnableChooseWinenr()
+    {
+        chooseWinnerBtn.SetActive(true);
+    }
+
+    private void OnChooseWinnerClick()
+    {
+        chooseWinnerBtn.SetActive(false);
+        canSelectWinner = true;
     }
 
     private void OnStartGame()
@@ -37,12 +56,20 @@ public class DealerController : MonoBehaviour
         myTurn = true;
         receivedCards = 0;
         startDraw = true;
+        currentNumCard = 0;
+        GameManager.UpdatePlayer("Player", currentNumCard);
+        chooseWinnerBtn.SetActive(false);
         StopAllCoroutines();
     }
 
     void Update()
     {
         if (!myTurn) return;
+        if(canSelectWinner)
+        {
+            WinnerTrace();
+            return;
+        }
 
         //Attempt start Drag
         if (Input.GetMouseButtonDown(0) && !draggedCard)
@@ -62,6 +89,20 @@ public class DealerController : MonoBehaviour
             StopDrag();
         }
 
+    }
+    private void WinnerTrace()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+        {
+            if(hit.collider.gameObject.tag == "AI")
+            {
+                print(GameManager.IsCorrectPlayerToWin(hit.collider.gameObject.GetComponent<AI>().AIName));
+                canSelectWinner = false;
+            }
+        }
     }
 
     void Tracer()
@@ -94,7 +135,6 @@ public class DealerController : MonoBehaviour
         {
             targetPosition = ray.origin + ray.direction * 5f;
         }
-
         draggedCard.transform.position = Vector3.Lerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 5f);
     }
 
@@ -149,14 +189,9 @@ public class DealerController : MonoBehaviour
         colliderRef.enabled = !colliderRef.enabled;
     }
 
-
-
     private void OnTriggerEnter(Collider other)
     {
-        if (startDraw)
-        {
-            HandleCard(other);
-        }
+        HandleCard(other);
     }
 
     private void HandleCard(Collider other)
@@ -164,7 +199,12 @@ public class DealerController : MonoBehaviour
         ++receivedCards;
         isDragging = false;
         StartCoroutine(CardAnimation(.5f));
-        colliderRef.enabled = !(receivedCards > 1);
+        colliderRef.enabled = !(receivedCards > 1 && startDraw);
+        if (draggedCard.TryGetComponent<CardInfo>(out CardInfo cardInfo))
+        {
+            currentNumCard += cardInfo.Value;
+            GameManager.UpdatePlayer("Player",currentNumCard);
+        }
     }
 
     IEnumerator CardAnimation(float duration)
@@ -191,12 +231,10 @@ public class DealerController : MonoBehaviour
         draggedCard.transform.position = endPos;
         GameManager.StopDragPlayerCallback(draggedCard);
 
-        if (receivedCards > 1)
+        if (receivedCards > 1 && startDraw)
         {
             startDraw = false;
             GameManager.ChangeTurnCallback?.Invoke(false);
         }
-       
     }
 }
-

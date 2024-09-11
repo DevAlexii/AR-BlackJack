@@ -36,7 +36,7 @@ public class AIManager : MonoBehaviour
         startPendingPlayers = InPendingPlayers;
         pendingPlayers = InPendingPlayers;
         playerStates = InPendingPlayers;
-        startRound = true ;
+        startRound = true;
     }
     private void OnStateUpdate(bool reducePending)
     {
@@ -49,6 +49,7 @@ public class AIManager : MonoBehaviour
             if (pendingPlayers <= 0)
             {
                 GameManager.DelearReceiverCallback?.Invoke();
+                GameManager.EnableChooseWinnerCallback?.Invoke();
             }
         }
     }

@@ -29,6 +29,9 @@ public class AI : MonoBehaviour
     [SerializeField]
     TMP_Text stateTxt;
 
+    [SerializeField]
+    TMP_Text nameTXT;
+
     //Card Reference
     GameObject cardRef;
     int receivedCard;
@@ -62,11 +65,16 @@ public class AI : MonoBehaviour
             }
         }
     }
+    string aiName;
+    public string AIName => aiName;
 
     private void Start()
     {
         GameManager.ChangeTurnCallback += OnChangeTurn;
         State = AIState.Hit;
+        aiName = "AI" + Random.Range(1, 10000);
+        GameManager.UpdatePlayer(AIName,currentSumCardValues);
+        nameTXT.text = AIName; 
     }
     private void OnChangeTurn(bool inDealerTurn)
     {
