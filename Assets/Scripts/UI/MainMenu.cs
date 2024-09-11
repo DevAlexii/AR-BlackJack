@@ -42,4 +42,9 @@ public class MainMenu : MonoBehaviour
             GameManager.ChangeAINumCallback?.Invoke(num);
         }
     }
+
+    public void TooglePause()
+    {
+        Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+    }
 }

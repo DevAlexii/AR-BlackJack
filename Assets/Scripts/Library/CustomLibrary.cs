@@ -1,11 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class CustomLibrary
 {
-    public static void Shuffle(ref GameObject[] array)
+    public static void Shuffle(ref List<GameObject> container)
     {
         System.Random rng = new System.Random();
-        int n = array.Length;
+        int n = container.Count;
 
         for (int i = n - 1; i > 0; i--)
         {
@@ -13,14 +14,14 @@ public static class CustomLibrary
             int j = rng.Next(0, i + 1);
 
             //Swap elements in Array indexes
-            GameObject temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
+            GameObject temp = container[i];
+            container[i] = container[j];
+            container[j] = temp;
 
             //Swap elements in world position
-            Vector3 tempPos = array[i].transform.position;
-            array[i].transform.position = array[j].transform.position;
-            array[j].transform.position = tempPos;
+            Vector3 tempPos = container[i].transform.position;
+            container[i].transform.position = container[j].transform.position;
+            container[j].transform.position = tempPos;
         }
     }
 }

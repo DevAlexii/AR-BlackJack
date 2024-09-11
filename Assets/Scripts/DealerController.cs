@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class DealerController : MonoBehaviour
 {
+    [SerializeField]
+    Transform cardPoint;
+
+    private Collider colliderRef;
+
     private GameObject draggedCard;
     private bool isDragging;
     [SerializeField]
@@ -10,16 +15,34 @@ public class DealerController : MonoBehaviour
     [SerializeField]
     private float releaseCardTimer = .5f;
     private Vector3 lastPosCard;
-    private bool isMineTurn = true;
+    private bool myTurn = true;
+    int receivedCards = 0;
+    bool startDraw = true;
 
     private void Start()
     {
+        GameManager.StartGameCallback += OnStartGame;
         GameManager.ChangeTurnCallback += OnChangeTurn;
+        GameManager.StopDragPlayerCallback += OnForceStopDrag;
+        GameManager.DelearReceiverCallback += OnDelearReceiver;
+        colliderRef = GetComponent<Collider>();
+        colliderRef.enabled = false;
+    }
+
+    private void OnStartGame()
+    {
+        colliderRef.enabled = false;
+        isDragging = false;
+        draggedCard = null;
+        myTurn = true;
+        receivedCards = 0;
+        startDraw = true;
+        StopAllCoroutines();
     }
 
     void Update()
     {
-        if(!isMineTurn) return;
+        if (!myTurn) return;
 
         //Attempt start Drag
         if (Input.GetMouseButtonDown(0) && !draggedCard)
@@ -43,7 +66,7 @@ public class DealerController : MonoBehaviour
 
     void Tracer()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); 
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
         int layerMask = 1 << LayerMask.NameToLayer("Card");
@@ -52,7 +75,6 @@ public class DealerController : MonoBehaviour
         {
             draggedCard = hit.collider.gameObject;
             isDragging = true;
-            draggedCard.GetComponent<Collider>().enabled = false;
             lastPosCard = draggedCard.transform.position;
         }
     }
@@ -62,8 +84,9 @@ public class DealerController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPosition;
+        int layerMask = ~(1 << LayerMask.NameToLayer("Card"));
 
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             targetPosition = hit.point + Vector3.up * offsetY;
         }
@@ -72,7 +95,7 @@ public class DealerController : MonoBehaviour
             targetPosition = ray.origin + ray.direction * 5f;
         }
 
-        draggedCard.transform.position = Vector3.Lerp(draggedCard.transform.position,targetPosition,Time.deltaTime * 5f);
+        draggedCard.transform.position = Vector3.Lerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 5f);
     }
 
     void StopDrag()
@@ -80,22 +103,21 @@ public class DealerController : MonoBehaviour
         if (isDragging)
         {
             StartCoroutine(ResetCardCoroutine(releaseCardTimer));
-            draggedCard.GetComponent<Collider>().enabled = true;
-            isDragging  = false;
+            isDragging = false;
         }
     }
 
     IEnumerator ResetCardCoroutine(float duration)
     {
-        Vector3 startPos = draggedCard.transform.position; 
+        Vector3 startPos = draggedCard.transform.position;
         Vector3 endPos = lastPosCard;
-        float elapsedTime = 0f; 
+        float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
-            draggedCard.transform.position = Vector3.Slerp(startPos, endPos, elapsedTime / duration); 
-            elapsedTime += Time.deltaTime; 
-            yield return null; 
+            draggedCard.transform.position = Vector3.Slerp(startPos, endPos, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
         }
 
         draggedCard.transform.position = endPos;
@@ -104,12 +126,77 @@ public class DealerController : MonoBehaviour
 
     private void OnChangeTurn(bool InDealerTurn)
     {
-        isMineTurn = InDealerTurn;
+        myTurn = InDealerTurn;
 
-        if (!isMineTurn)
+        if (!myTurn)
         {
-            isDragging = false;
+            OnForceStopDrag(null);
+        }
+    }
+
+    private void OnForceStopDrag(GameObject card)
+    {
+        isDragging = false;
+        if (draggedCard)
+        {
+            draggedCard.GetComponent<Collider>().enabled = false;
             draggedCard = null;
         }
     }
+
+    private void OnDelearReceiver()
+    {
+        colliderRef.enabled = !colliderRef.enabled;
+    }
+
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (startDraw)
+        {
+            HandleCard(other);
+        }
+    }
+
+    private void HandleCard(Collider other)
+    {
+        ++receivedCards;
+        isDragging = false;
+        StartCoroutine(CardAnimation(.5f));
+        colliderRef.enabled = !(receivedCards > 1);
+    }
+
+    IEnumerator CardAnimation(float duration)
+    {
+        Vector3 startPos = draggedCard.transform.position;
+        Vector3 endPos = cardPoint.position +
+                         transform.right * .2f * (receivedCards - 1) +
+                         Vector3.up * .02f * (receivedCards - 1);
+        Quaternion startRot = draggedCard.transform.rotation;
+        Vector3 eulerRot = cardPoint.eulerAngles + new Vector3(180, 0, 0);
+        Quaternion targetRot = Quaternion.Euler(eulerRot);
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            float alpha = elapsedTime / duration;
+
+            draggedCard.transform.position = Vector3.Slerp(startPos, endPos, alpha);
+            draggedCard.transform.rotation = Quaternion.Slerp(startRot, targetRot, alpha);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        draggedCard.transform.position = endPos;
+        GameManager.StopDragPlayerCallback(draggedCard);
+
+        if (receivedCards > 1)
+        {
+            startDraw = false;
+            GameManager.ChangeTurnCallback?.Invoke(false);
+        }
+       
+    }
 }
+

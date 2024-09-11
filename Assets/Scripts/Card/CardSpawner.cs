@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class CardSpawner : MonoBehaviour
@@ -6,10 +8,12 @@ public class CardSpawner : MonoBehaviour
     [SerializeField]
     private GameObject[] cardsType;
 
-    private GameObject[] cards  = new GameObject[52];
+    private GameObject[] originalDeck  = new GameObject[52];
+    private List<GameObject> currentDeck = new List<GameObject>();
 
     [SerializeField]
     private float offsetY;
+
 
     //TextureOffset Setting
     private float tileOffsetX = .137f;
@@ -19,17 +23,17 @@ public class CardSpawner : MonoBehaviour
 
     private void Start()
     {
-        //Binding StartGame
         GameManager.StartGameCallback += Init;
+        GameManager.StopDragPlayerCallback += RemoveCardFromDeck;
     }
 
     private void Init()
     {
-        if (cards[0])
+        if (originalDeck[0])
         {
-            for (int i = 0; i < cards.Length; ++i)
+            for (int i = 0; i < originalDeck.Length; ++i)
             {
-                Destroy(cards[i]);
+                Destroy(originalDeck[i]);
             } 
         }
 
@@ -48,8 +52,8 @@ public class CardSpawner : MonoBehaviour
 
             //Instantiate new game object and store it in the array
             GameObject obj = Instantiate(cardsType[cardIndex - 1], pos, transform.rotation, transform);
-            cards[i] = obj;
-
+            originalDeck[i] = obj;
+            currentDeck.Add(obj);
 
             //Change offsetTexture in spawned card material to change visible number
             if (obj != null && obj.TryGetComponent<CardInfo>(out CardInfo card))
@@ -71,9 +75,13 @@ public class CardSpawner : MonoBehaviour
             }
         }
     }
-
     public void ShuffleCards()
     {
-        CustomLibrary.Shuffle(ref cards);
+        CustomLibrary.Shuffle(ref currentDeck);
+    }
+
+    private void RemoveCardFromDeck(GameObject card)
+    {
+        currentDeck.Remove(card);
     }
 }

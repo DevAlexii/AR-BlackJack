@@ -27,7 +27,7 @@ public class AISpawner : MonoBehaviour
 
     private void Init()
     {
-        for (int i = AISpawned.Count - 1; i > 0; --i)
+        for (int i = AISpawned.Count - 1; i >= 0; --i)
         {
             Destroy(AISpawned[i]);
             AISpawned.RemoveAt(i);
