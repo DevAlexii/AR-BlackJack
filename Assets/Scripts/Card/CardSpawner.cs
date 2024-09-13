@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class CardSpawner : MonoBehaviour
@@ -10,6 +9,7 @@ public class CardSpawner : MonoBehaviour
 
     private GameObject[] originalDeck  = new GameObject[52];
     private List<GameObject> currentDeck = new List<GameObject>();
+    private List<GameObject> removedCards = new List<GameObject>();
 
     [SerializeField]
     private float offsetY;
@@ -84,11 +84,26 @@ public class CardSpawner : MonoBehaviour
 
     private void RemoveCardFromDeck(GameObject card)
     {
+        removedCards.Add(card);
         currentDeck.Remove(card);
     }
 
     public void StartNewRound()
     {
         GameManager.ResetPlayer();
+
+        foreach (var obj in currentDeck)
+        {
+            obj.transform.position += Vector3.up * (offsetY * removedCards.Count);
+        }
+
+        for (int i = 0; i < removedCards.Count; i++)
+        {
+            GameObject obj = removedCards[i];
+            currentDeck.Add(obj);
+            obj.transform.position = transform.position + Vector3.up * (i * offsetY);
+            obj.transform.rotation = Quaternion.Euler(-90,0,0);
+        }
+        removedCards.Clear();
     }
 }
