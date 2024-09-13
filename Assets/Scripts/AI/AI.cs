@@ -5,12 +5,12 @@ using TMPro;
 
 public enum AIState
 {
-    Stay,
-    Hit,
-    Bust,
-    Thinking
+    Thinking = 0,
+    Bust = 1,
+    Hit = 2,
+    Stay = 3,
 }
-
+[RequireComponent(typeof(Animator))]
 public class AI : MonoBehaviour
 {
     [Header("AI Setup")]
@@ -45,17 +45,22 @@ public class AI : MonoBehaviour
     {
         set
         {
+            int stateNum = (int)state;
+
             state = value;
             switch (state)
             {
                 case AIState.Stay:
                     stateTxt.text = "State:Stay";
+                    anim.SetTrigger("Stay");
                     break;
                 case AIState.Hit:
                     stateTxt.text = "State:Hit";
+                    anim.SetTrigger("Hit");
                     break;
                 case AIState.Bust:
                     stateTxt.text = "State:Bust";
+                    anim.SetTrigger("Angry");
                     break;
                 case AIState.Thinking:
                     stateTxt.text = "State:Thinking..";
@@ -67,14 +72,21 @@ public class AI : MonoBehaviour
     }
     string aiName;
     public string AIName => aiName;
+    private Animator anim;
+
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+    }
 
     private void Start()
     {
         GameManager.ChangeTurnCallback += OnChangeTurn;
         State = AIState.Hit;
         aiName = "AI" + Random.Range(1, 10000);
-        GameManager.UpdatePlayer(AIName,currentSumCardValues);
-        nameTXT.text = AIName; 
+        GameManager.UpdatePlayer(AIName, currentSumCardValues);
+        nameTXT.text = AIName;
+
     }
     private void OnChangeTurn(bool inDealerTurn)
     {

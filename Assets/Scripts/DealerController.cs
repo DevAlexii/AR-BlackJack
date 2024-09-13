@@ -35,6 +35,7 @@ public class DealerController : MonoBehaviour
     //VFX 
     [SerializeField]
     private GameObject[] selectionVFX;// 0=>Winner vfx,1=>Loser vfx
+    private GameObject spawnedVFX;
 
     private void Start()
     {
@@ -71,13 +72,14 @@ public class DealerController : MonoBehaviour
         GameManager.UpdatePlayer("Player", currentNumCard);
         chooseWinnerBtn.SetActive(false);
         GameManager.ResetPlayer();
+        Destroy(spawnedVFX);
         StopAllCoroutines();
     }
 
     void Update()
     {
         if (!myTurn) return;
-        if(canSelectWinner && Input.GetMouseButtonUp(0))
+        if (canSelectWinner && Input.GetMouseButtonUp(0))
         {
             WinnerTrace();
             return;
@@ -109,13 +111,13 @@ public class DealerController : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity))
         {
-            if(hit.collider.gameObject.tag == "AI")
+            if (hit.collider.gameObject.tag == "AI")
             {
                 startNewRoundBtn.SetActive(true);
                 canSelectWinner = false;
 
                 string name;
-                if(hit.transform.gameObject == gameObject)
+                if (hit.transform.gameObject == gameObject)
                 {
                     name = "Player";
                 }
@@ -126,8 +128,11 @@ public class DealerController : MonoBehaviour
 
                 bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
                 int index = correctSelection ? 0 : 1;
-                Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90,0,0), hit.transform);
+                spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
                 SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
+
+                hit.transform.GetComponent<Animator>().SetTrigger("Winner");
+                hit.transform.GetComponent<Animator>().SetBool("RandomWinner", Random.Range(0, 2) == 0);
             }
         }
     }
@@ -224,6 +229,7 @@ public class DealerController : MonoBehaviour
 
     private void HandleCard(Collider other)
     {
+        other.gameObject.layer = 0;
         ++receivedCards;
         isDragging = false;
         StartCoroutine(CardAnimation(.5f));
@@ -231,7 +237,7 @@ public class DealerController : MonoBehaviour
         if (draggedCard.TryGetComponent<CardInfo>(out CardInfo cardInfo))
         {
             currentNumCard += cardInfo.Value;
-            GameManager.UpdatePlayer("Player",currentNumCard);
+            GameManager.UpdatePlayer("Player", currentNumCard);
         }
     }
 
@@ -239,8 +245,8 @@ public class DealerController : MonoBehaviour
     {
         Vector3 startPos = draggedCard.transform.position;
         Vector3 endPos = cardPoint.position +
-                         transform.right * .2f * (receivedCards - 1) +
-                         Vector3.up * .02f * (receivedCards - 1);
+                         Vector3.up * .0005f * (receivedCards - 1) +
+                         -Vector3.right * .05f * (receivedCards - 1);
         Quaternion startRot = draggedCard.transform.rotation;
         Vector3 eulerRot = cardPoint.eulerAngles + new Vector3(180, 0, 0);
         Quaternion targetRot = Quaternion.Euler(eulerRot);

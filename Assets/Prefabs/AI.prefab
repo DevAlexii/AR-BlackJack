@@ -426,8 +426,8 @@ GameObject:
   - component: {fileID: 1178943456017319984}
   - component: {fileID: 3913211260167481322}
   - component: {fileID: 7851319129297534394}
-  - component: {fileID: 4986589533029169222}
   - component: {fileID: 3339770440138884764}
+  - component: {fileID: 4986589533029169222}
   m_Layer: 3
   m_Name: AI
   m_TagString: AI
@@ -524,24 +524,6 @@ CapsuleCollider:
   m_Height: 1.58
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &4986589533029169222
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6893686926617561977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45d9e5480533ac14da5c43f7a91b664d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startCardPoint: {fileID: 7718508813342927417}
-  cardAnimationTime: 0.5
-  rightOffset: 0.05
-  valueTxt: {fileID: 2836939797237654837}
-  stateTxt: {fileID: 4263191562678997458}
-  nameTXT: {fileID: 2326067382713121895}
 --- !u!95 &3339770440138884764
 Animator:
   serializedVersion: 5
@@ -563,6 +545,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4986589533029169222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6893686926617561977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d9e5480533ac14da5c43f7a91b664d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startCardPoint: {fileID: 7718508813342927417}
+  cardAnimationTime: 0.5
+  rightOffset: 0.05
+  valueTxt: {fileID: 2836939797237654837}
+  stateTxt: {fileID: 4263191562678997458}
+  nameTXT: {fileID: 2326067382713121895}
 --- !u!1 &6916258908138762501
 GameObject:
   m_ObjectHideFlags: 0
