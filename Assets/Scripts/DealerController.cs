@@ -4,26 +4,37 @@ using UnityEngine.UI;
 
 public class DealerController : MonoBehaviour
 {
+    //Card Position
     [SerializeField]
     Transform cardPoint;
 
+    //UI Reference
     [SerializeField]
     GameObject chooseWinnerBtn;
+    [SerializeField]
+    GameObject startNewRoundBtn;
 
     private Collider colliderRef;
 
+    //Dragging setup
     private GameObject draggedCard;
     private bool isDragging;
     [SerializeField]
-    private float offsetY = .5f;
+    private float dragOffsetY = .01f;
     [SerializeField]
     private float releaseCardTimer = .5f;
     private Vector3 lastPosCard;
+
+    //Delear Info
     private bool myTurn = true;
     int receivedCards = 0;
     bool startDraw = true;
     int currentNumCard;
     bool canSelectWinner;
+
+    //VFX 
+    [SerializeField]
+    private GameObject[] selectionVFX;// 0=>Winner vfx,1=>Loser vfx
 
     private void Start()
     {
@@ -59,13 +70,14 @@ public class DealerController : MonoBehaviour
         currentNumCard = 0;
         GameManager.UpdatePlayer("Player", currentNumCard);
         chooseWinnerBtn.SetActive(false);
+        GameManager.ResetPlayer();
         StopAllCoroutines();
     }
 
     void Update()
     {
         if (!myTurn) return;
-        if(canSelectWinner)
+        if(canSelectWinner && Input.GetMouseButtonUp(0))
         {
             WinnerTrace();
             return;
@@ -99,8 +111,23 @@ public class DealerController : MonoBehaviour
         {
             if(hit.collider.gameObject.tag == "AI")
             {
-                print(GameManager.IsCorrectPlayerToWin(hit.collider.gameObject.GetComponent<AI>().AIName));
+                startNewRoundBtn.SetActive(true);
                 canSelectWinner = false;
+
+                string name;
+                if(hit.transform.gameObject == gameObject)
+                {
+                    name = "Player";
+                }
+                else
+                {
+                    name = hit.transform.GetComponent<AI>().AIName;
+                }
+
+                bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
+                int index = correctSelection ? 0 : 1;
+                Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90,0,0), hit.transform);
+                SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
             }
         }
     }
@@ -125,11 +152,11 @@ public class DealerController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPosition;
-        int layerMask = ~(1 << LayerMask.NameToLayer("Card"));
+        int layerMask = ~((1 << LayerMask.NameToLayer("Card")) | (1 << LayerMask.NameToLayer("Player")));
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
-            targetPosition = hit.point + Vector3.up * offsetY;
+            targetPosition = hit.point + Vector3.up * dragOffsetY;
         }
         else
         {
@@ -192,6 +219,7 @@ public class DealerController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         HandleCard(other);
+        SoundManager.self.PlayClip(ClipType.PlayCard);
     }
 
     private void HandleCard(Collider other)

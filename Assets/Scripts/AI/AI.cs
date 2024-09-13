@@ -123,6 +123,8 @@ public class AI : MonoBehaviour
         if (!hasEnoughCard || state == AIState.Hit)
         {
             HandleCard(other);
+            GameManager.UpdatePlayer(AIName, currentSumCardValues);
+            SoundManager.self.PlayClip(ClipType.PlayCard);
         }
     }
 
@@ -155,7 +157,7 @@ public class AI : MonoBehaviour
         Vector3 startPos = cardRef.transform.position;
         Vector3 endPos = startCardPoint.position +
                          transform.right * rightOffset * (receivedCard - 1) +
-                         Vector3.up * .02f * (receivedCard - 1);
+                         Vector3.up * .005f * (receivedCard - 1);
         Quaternion startRot = cardRef.transform.rotation;
         float rollOffset = receivedCard > 1 ? 180 : 0;
         Vector3 eulerRot = startCardPoint.eulerAngles + new Vector3(rollOffset, 0, 0);

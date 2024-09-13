@@ -8,7 +8,7 @@ public class AISpawner : MonoBehaviour
     private Transform[] points;
 
     [SerializeField]
-    private GameObject AIPrefab;
+    private GameObject[] AIPrefab;
 
     private List<GameObject> AISpawned = new List<GameObject>();
 
@@ -35,13 +35,15 @@ public class AISpawner : MonoBehaviour
 
 
         List<Transform> list = points.ToList<Transform>();
+        List<GameObject> prefabsCopy = AIPrefab.ToList();
 
         for (int i = 0; i < AINum; i++)
         {
             int index = Random.Range(0, list.Count);
-            GameObject obj = Instantiate(AIPrefab, list[index].position, list[index].rotation, transform);
+            int random = Random.Range(0, prefabsCopy.Count);
+            GameObject obj = Instantiate(prefabsCopy[random], list[index].position, list[index].rotation, transform);
             list.RemoveAt(index);
-
+            prefabsCopy.RemoveAt(random);
             AISpawned.Add(obj);
         }
         GameManager.ResetPendingPlayersCallback(AINum);

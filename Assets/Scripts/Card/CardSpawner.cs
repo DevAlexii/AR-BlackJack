@@ -79,10 +79,16 @@ public class CardSpawner : MonoBehaviour
     public void ShuffleCards()
     {
         CustomLibrary.Shuffle(ref currentDeck);
+        SoundManager.self.PlayClip(ClipType.Shuffle);
     }
 
     private void RemoveCardFromDeck(GameObject card)
     {
         currentDeck.Remove(card);
+    }
+
+    public void StartNewRound()
+    {
+        GameManager.ResetPlayer();
     }
 }
