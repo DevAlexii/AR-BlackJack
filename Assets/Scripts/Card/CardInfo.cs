@@ -8,6 +8,13 @@ public class CardInfo : MonoBehaviour
 
     public void Init(int InValue)
     {
-        value = InValue + 1; //+1 cause spawn iterator start count from 0
+        //+1 cause spawn iterator start count from 0
+
+        if (InValue + 1 == 1){
+            value = 11;
+            return;
+        }
+       
+        value = Mathf.Clamp(InValue + 1,2,10); 
     }
 }
