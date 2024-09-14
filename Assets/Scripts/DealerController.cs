@@ -38,6 +38,12 @@ public class DealerController : BasePlayer
         GameManager.DelearReceiverCallback += OnDelearReceiver;
         GameManager.EnableChooseWinnerCallback += OnEnableChooseWinenr;
         GameManager.NewRoundCallback += OnStartGame;
+        GameManager.GameOverCallback += () =>
+        {
+            chooseWinnerBtn.SetActive(false);
+            startNewRoundBtn.SetActive(false);
+            chooseWinnerBtn.transform.parent.gameObject.SetActive(false);
+        };
         chooseWinnerBtn.GetComponent<Button>().onClick.AddListener(OnChooseWinnerClick);
         colliderRef = GetComponent<Collider>();
         colliderRef.enabled = false;
@@ -124,6 +130,7 @@ public class DealerController : BasePlayer
                 }
 
                 bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
+                GameManager.AddHappinessCallback?.Invoke(correctSelection?.25f:-.25f);
                 int index = correctSelection ? 0 : 1;
                 spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
                 SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
@@ -150,9 +157,9 @@ public class DealerController : BasePlayer
             if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
             {
                 Vector3 playerPos = hit.transform.position + hit.transform.forward * 1f;
-                if (hit.transform.GetComponent<AI>())
+                if (hit.transform.TryGetComponent<BasePlayer>(out BasePlayer player))
                 {
-                    PlayerCardsDebugger.Instance.DebuggerShowPopUp(hit.transform.GetComponent<BasePlayer>().PlayerName, playerPos, hit.transform.GetComponent<AI>().State.ToString());
+                    PlayerCardsDebugger.Instance.DebuggerShowPopUp(player.PlayerName, playerPos, player.GetState());
                 }
                 return;
             }
@@ -179,7 +186,7 @@ public class DealerController : BasePlayer
         {
             targetPosition = ray.origin + ray.direction * 2.5f;
         }
-        draggedCard.transform.position = Vector3.Lerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 5f);
+        draggedCard.transform.position = Vector3.Slerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 8f);
     }
 
     void StopDrag()

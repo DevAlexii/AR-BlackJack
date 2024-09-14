@@ -6,10 +6,17 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     TMP_InputField inputField;
 
+    [SerializeField]
+    GameObject GameOverRef;
+
     private void Start()
     {
         //Bind inputfield delegate when finish to insert number
         inputField.onEndEdit.AddListener(ChangeAINum);
+        GameManager.GameOverCallback += () =>
+        {
+            GameOverRef.SetActive(true);
+        };
     }
     public void StartGame()
     {

@@ -122,4 +122,9 @@ public class AI : BasePlayer
             State = AIState.Bust; //when reach cards sum over 21 it means player has bust
         }
     }
+
+    public override string GetState()
+    {
+        return state.ToString();
+    }
 }

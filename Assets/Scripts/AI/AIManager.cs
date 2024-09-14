@@ -1,7 +1,22 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AIManager : MonoBehaviour
 {
+    float amountHappiness = 1;
+    float Happiness
+    {
+        get => amountHappiness;
+        set
+        {
+            amountHappiness = value;
+            happinessImage.fillAmount = amountHappiness;
+        }
+    }
+
+    [SerializeField]
+    Image happinessImage;
+
     int startPendingPlayers;
     int pendingPlayers;
     int playerStates;
@@ -16,6 +31,18 @@ public class AIManager : MonoBehaviour
         GameManager.NewRoundCallback += () =>
         {
             ResetPendingPlayers(startPendingPlayers);
+        };
+        GameManager.AddHappinessCallback += (float value) =>
+        {
+            Happiness = Mathf.Clamp(Happiness + value, .0f, 1.0f);
+            if (Happiness <= 0)
+            {
+                GameManager.GameOverCallback?.Invoke();
+            }
+        };
+        GameManager.StartGameCallback += () =>
+        {
+            Happiness = 1;
         };
     }
     private void ReducePendingPlayer()

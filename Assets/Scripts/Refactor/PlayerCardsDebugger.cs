@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -62,8 +63,15 @@ public class PlayerCardsDebugger : MonoBehaviour
         players[inName] = inCardsSum;
     }
 
+
+    private Coroutine coroutineRef;
     public void DebuggerShowPopUp(string inName,Vector3 playerPos,string inState)
     {
+        if (coroutineRef is not null)
+        {
+            StopCoroutine(coroutineRef);
+        }
+        coroutineRef = StartCoroutine(HideUI(5f));
         DebuggerUI.SetActive(false);
         transform.position = playerPos + Vector3.up * .5f;
         DebuggerUI.SetActive(true);
@@ -76,10 +84,16 @@ public class PlayerCardsDebugger : MonoBehaviour
 
     public void OnShowStat()
     {
-        Invoke(nameof(HideUI),2f);
+        if (coroutineRef is not null)
+        {
+            StopCoroutine(coroutineRef);
+        }
+
+        coroutineRef = StartCoroutine(HideUI());
     }
-    private void HideUI()
+    IEnumerator HideUI(float time = 2f)
     {
+        yield return new WaitForSeconds(time);
         DebuggerUI.SetActive(false);
     }
 }

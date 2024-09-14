@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class BasePlayer : MonoBehaviour
@@ -57,10 +58,12 @@ public class BasePlayer : MonoBehaviour
             float alpha = elapsedTime / duration;
 
             obj.transform.position = Vector3.Slerp(startPos, endPos, alpha);
-            obj.transform.rotation = Quaternion.Slerp(startRot, targetRot, alpha);
+            obj.transform.rotation = Quaternion.Slerp(startRot, targetRot, alpha * 1.5f);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
         obj.transform.position = endPos;
     }
+
+    public virtual string GetState() { return ""; }
 }

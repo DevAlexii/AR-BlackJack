@@ -55,7 +55,7 @@ public class CardSpawner : MonoBehaviour
             Vector3 pos = transform.position + Vector3.up * (i * offsetY);
 
             //Instantiate new game object and store it in the array
-            GameObject obj = Instantiate(cardsType[cardIndex - 1], pos, transform.rotation, transform);
+            GameObject obj = Instantiate(cardsType[cardIndex - 1], pos, Quaternion.Euler(90,0,0), transform);
             originalDeck[i] = obj;
             currentDeck.Add(obj);
 
@@ -113,7 +113,7 @@ public class CardSpawner : MonoBehaviour
             GameObject obj = removedCards[i];
             currentDeck.Insert(i, obj);
             obj.transform.position = transform.position + Vector3.up * (i * offsetY);
-            obj.transform.rotation = Quaternion.Euler(-90, 0, 0);
+            obj.transform.rotation = Quaternion.Euler(90, 0, 0);
             obj.layer = 0;
         }
         removedCards.Clear();

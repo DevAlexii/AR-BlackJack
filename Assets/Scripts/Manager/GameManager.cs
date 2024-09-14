@@ -14,6 +14,8 @@ public static class GameManager
     public static Action DelearReceiverCallback;
     public static Action EnableChooseWinnerCallback;
     public static Action NewRoundCallback;
+    public static Action<float> AddHappinessCallback;
+    public static Action GameOverCallback;
 
     static Dictionary<string, int> players = new Dictionary<string, int>();
 
