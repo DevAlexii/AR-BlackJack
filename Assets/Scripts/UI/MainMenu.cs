@@ -46,7 +46,7 @@ public class MainMenu : MonoBehaviour
         {
             //Update text to minimal ai num to play when input is a wrong text
             inputField.text = "1";
-
+            num = 1;
             GameManager.ChangeAINumCallback?.Invoke(num);
         }
     }

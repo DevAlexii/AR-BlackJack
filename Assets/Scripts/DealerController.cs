@@ -87,7 +87,6 @@ public class DealerController : BasePlayer
             WinnerTrace();
             return;
         }
-
         //Attempt start Drag
         if (Input.GetMouseButtonDown(0) && !draggedCard)
         {
@@ -230,7 +229,6 @@ public class DealerController : BasePlayer
         isDragging = false;
         if (draggedCard)
         {
-            draggedCard.GetComponent<Collider>().enabled = false;
             draggedCard = null;
         }
     }
