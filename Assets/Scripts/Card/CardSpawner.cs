@@ -7,7 +7,7 @@ public class CardSpawner : MonoBehaviour
     [SerializeField]
     private GameObject[] cardsType;
 
-    private GameObject[] originalDeck  = new GameObject[52];
+    private GameObject[] originalDeck = new GameObject[52];
     private List<GameObject> currentDeck = new List<GameObject>();
     private List<GameObject> removedCards = new List<GameObject>();
 
@@ -34,7 +34,7 @@ public class CardSpawner : MonoBehaviour
             for (int i = 0; i < originalDeck.Length; ++i)
             {
                 Destroy(originalDeck[i]);
-            } 
+            }
         }
         currentDeck.Clear();
 
@@ -106,14 +106,25 @@ public class CardSpawner : MonoBehaviour
         for (int i = 0; i < removedCards.Count; i++)
         {
             GameObject obj = removedCards[i];
-            currentDeck.Insert(i,obj);
+            currentDeck.Insert(i, obj);
             obj.transform.position = transform.position + Vector3.up * (i * offsetY);
-            obj.transform.rotation = Quaternion.Euler(-90,0,0);
+            obj.transform.rotation = Quaternion.Euler(-90, 0, 0);
             obj.layer = 0;
         }
         removedCards.Clear();
         currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
 
         GameManager.NewRoundCallback?.Invoke();
+    }
+
+    public void OnFinishRound()
+    {
+        foreach (var obj in removedCards)
+        {
+            if (obj.transform.eulerAngles.x == 90f)
+            {
+                obj.transform.eulerAngles += new Vector3(180, 0, 0);
+            }
+        }
     }
 }
