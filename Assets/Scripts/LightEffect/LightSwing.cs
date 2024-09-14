@@ -8,6 +8,7 @@ public class LightSwing : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Swing rotation based on sine function
         alpha += Time.deltaTime * speed;
 
         Vector3 rot = new Vector3(90 + Mathf.Sin(alpha) * 10, 90,0 );

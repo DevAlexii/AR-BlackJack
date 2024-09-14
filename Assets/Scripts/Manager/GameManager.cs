@@ -19,14 +19,20 @@ public static class GameManager
 
     public static void ResetPlayer()
     {
-        players.Clear();
+        players.Clear(); //Clear all players infos
     }
     public static void UpdatePlayer(string inPlayerName, int inPlayerCardNum)
     {
+        //Add/Update player in scene 
         players[inPlayerName] = inPlayerCardNum;
+        PlayerCardsDebugger.Instance.DebuggerUpdatePlayerStat(inPlayerName,inPlayerCardNum);
     }
+
     public static bool IsCorrectPlayerToWin(string inPlayerName)
     {
+        //Check if selected player is a winner by is cardsSum value
+        //If there are 2 or more player with same value, it is not managed according black jack rule, first found in the dictionary is the winner
+
         string winnerName = "";
         int highValue = 0;
         foreach (var name in players.Keys)

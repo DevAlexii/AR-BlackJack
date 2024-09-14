@@ -1,102 +1,63 @@
 using UnityEngine;
-using System.Collections;
-using TMPro;
-
 
 public enum AIState
 {
     Thinking = 0,
     Bust = 1,
     Hit = 2,
-    Stay = 3,
+    Stand = 3,
 }
 [RequireComponent(typeof(Animator))]
-public class AI : MonoBehaviour
+public class AI : BasePlayer
 {
-    [Header("AI Setup")]
-    [SerializeField]
-    Transform startCardPoint;
-
-    [SerializeField]
-    float cardAnimationTime = .5f;
-
-    [SerializeField]
-    float rightOffset = .2f;
-
-    [SerializeField]
-    TMP_Text valueTxt;
-
-    [SerializeField]
-    TMP_Text stateTxt;
-
-    [SerializeField]
-    TMP_Text nameTXT;
-
-    //Card Reference
-    GameObject cardRef;
-    int receivedCard;
-    bool hasEnoughCard => receivedCard >= 2;
-    int currentSumCardValues = 0;
+    bool hasEnoughCard => receivedCards >= 2;
 
     //AI Info
-    bool myTurn = false;
-    AIState state = AIState.Hit;
-    AIState State
+    AIState state;
+    public AIState State
     {
+        get => state;
         set
         {
-            int stateNum = (int)state;
-
             state = value;
+            if (!anim) return;
+
             switch (state)
             {
-                case AIState.Stay:
-                    stateTxt.text = "State:Stay";
+                case AIState.Stand:
                     anim.SetTrigger("Stay");
                     break;
                 case AIState.Hit:
-                    stateTxt.text = "State:Hit";
-                    anim.SetBool("RandomWinner", Random.Range(0,2) == 0);
+                    anim.SetBool("RandomWinner", Random.Range(0, 2) == 0);
                     anim.SetTrigger("Hit");
                     break;
                 case AIState.Bust:
-                    stateTxt.text = "State:Bust";
                     anim.SetTrigger("Angry");
                     break;
                 case AIState.Thinking:
-                    stateTxt.text = "State:Thinking..";
                     break;
                 default:
                     break;
             }
         }
     }
-    string aiName;
-    public string AIName => aiName;
     private Animator anim;
 
-    private void Awake()
+    protected override void Start()
     {
         anim = GetComponent<Animator>();
-    }
-
-    private void Start()
-    {
         GameManager.ChangeTurnCallback += OnChangeTurn;
         GameManager.NewRoundCallback += OnNewRound;
         State = AIState.Hit;
-        aiName = "AI" + Random.Range(1, 10000);
-        GameManager.UpdatePlayer(AIName, currentSumCardValues);
-        nameTXT.text = AIName;
+        playerName = "AI" + Random.Range(1, 10000);
+        base.Start();
     }
     private void OnNewRound()
     {
         myTurn = false;
         State = AIState.Hit;
-        receivedCard = 0;
-        cardRef = null;
-        currentSumCardValues = 0;
-        valueTxt.text = "CurrentValue:";
+        receivedCards = 0;
+        cardsSum = 0;
     }
 
     private void OnChangeTurn(bool inDealerTurn)
@@ -108,12 +69,12 @@ public class AI : MonoBehaviour
     {
         if (myTurn)
         {
-            if (state != AIState.Bust && state != AIState.Stay)
+            if (state != AIState.Bust && state != AIState.Stand)
             {
-                if (!ShouldActBasedOnCardValue()) //if do not want to hit reduce pending players
+                if (!ShouldActBasedOnCardValue()) 
                 {
-                    State = AIState.Stay;
-                    GameManager.AIStateUpdateCallback?.Invoke(true);
+                    State = AIState.Stand;
+                    GameManager.AIStateUpdateCallback?.Invoke(true); //Reduce pending players when is in state stand
                 }
                 else
                 {
@@ -123,16 +84,16 @@ public class AI : MonoBehaviour
             }
             else
             {
-                GameManager.AIStateUpdateCallback?.Invoke(true);
+                GameManager.AIStateUpdateCallback?.Invoke(true); //Reduce pending players when is in state stand/bust
             }
-            myTurn = false;
+            myTurn = false; //Finish AI Turn
         }
     }
 
     bool ShouldActBasedOnCardValue()
     {
         // Calculate the percentage to decide whether to hit a card
-        float percentage = ((21.0f - currentSumCardValues) / 21.0f) * 100.0f;
+        float percentage = ((21.0f - cardsSum) / 21.0f) * 100.0f;
         percentage = Mathf.Clamp(percentage, .0f, 100.0f);
 
         // Random decision not based on intelligence
@@ -146,57 +107,19 @@ public class AI : MonoBehaviour
         if (!hasEnoughCard || state == AIState.Hit)
         {
             HandleCard(other);
-            GameManager.UpdatePlayer(AIName, currentSumCardValues);
-            SoundManager.self.PlayClip(ClipType.PlayCard);
         }
     }
-
-    private void HandleCard(Collider other)
+    protected override void HandleCard(Collider other)
     {
-        ++receivedCard;
-        cardRef = other.gameObject;
-        GameManager.StopDragPlayerCallback(cardRef);
-        StartCoroutine(CardAnimation(cardAnimationTime));
-
-        if (receivedCard > 1)
+        base.HandleCard(other);
+        if (receivedCards > 1)
         {
-            GameManager.ReducePendingPlayersCallback();
+            GameManager.ReducePendingPlayersCallback(); //When Get enough cards change state and reduce pending players
             State = AIState.Thinking;
         }
-
-        if (cardRef.TryGetComponent<CardInfo>(out CardInfo card))
+        if (cardsSum > 21)
         {
-            currentSumCardValues += card.Value;
-            valueTxt.text = "CurrentValue:" + currentSumCardValues;
-            if (currentSumCardValues > 21)
-            {
-                State = AIState.Bust;
-            }
+            State = AIState.Bust; //when reach cards sum over 21 it means player has bust
         }
-    }
-
-    IEnumerator CardAnimation(float duration)
-    {
-        Vector3 startPos = cardRef.transform.position;
-        Vector3 endPos = startCardPoint.position +
-                         transform.right * rightOffset * (receivedCard - 1) +
-                         Vector3.up * .005f * (receivedCard - 1);
-        Quaternion startRot = cardRef.transform.rotation;
-        float rollOffset = receivedCard > 1 ? 180 : 0;
-        Vector3 eulerRot = startCardPoint.eulerAngles + new Vector3(rollOffset, 0, 0);
-        Quaternion targetRot = Quaternion.Euler(eulerRot);
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            float alpha = elapsedTime / duration;
-
-            cardRef.transform.position = Vector3.Slerp(startPos, endPos, alpha);
-            cardRef.transform.rotation = Quaternion.Slerp(startRot, targetRot, alpha);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-        cardRef.transform.position = endPos;
     }
 }

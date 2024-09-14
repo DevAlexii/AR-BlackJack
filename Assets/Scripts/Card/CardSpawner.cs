@@ -7,13 +7,12 @@ public class CardSpawner : MonoBehaviour
     [SerializeField]
     private GameObject[] cardsType;
 
-    private GameObject[] originalDeck = new GameObject[52];
+    private GameObject[] originalDeck = new GameObject[52]; //52 = original deck size
     private List<GameObject> currentDeck = new List<GameObject>();
     private List<GameObject> removedCards = new List<GameObject>();
 
     [SerializeField]
-    private float offsetY;
-
+    private float offsetY; //Offset deck card posY
 
     //TextureOffset Setting
     private float tileOffsetX = .1415f;
@@ -29,6 +28,7 @@ public class CardSpawner : MonoBehaviour
 
     private void Init()
     {
+        //Destroy all spawned cards if are in scene
         if (originalDeck[0])
         {
             for (int i = 0; i < originalDeck.Length; ++i)
@@ -36,7 +36,10 @@ public class CardSpawner : MonoBehaviour
                 Destroy(originalDeck[i]);
             }
         }
+
+        //clear list info
         currentDeck.Clear();
+        removedCards.Clear();
 
         int cardIndex = 0;
 
@@ -79,14 +82,15 @@ public class CardSpawner : MonoBehaviour
     }
     public void ShuffleCards()
     {
-        currentDeck[currentDeck.Count - 1].layer = 0;
-        CustomLibrary.Shuffle(ref currentDeck);
-        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
-        SoundManager.self.PlayClip(ClipType.Shuffle);
+        currentDeck[currentDeck.Count - 1].layer = 0; // remove layer from top card
+        CustomLibrary.Shuffle(ref currentDeck); //shuffle
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");// set layer to top card after shuffle
+        SoundManager.self.PlayClip(ClipType.Shuffle); //Play shuffle sound
     }
 
     private void RemoveCardFromDeck(GameObject card)
     {
+        //Remove card from current deck and add it to removedcard list and change layer to not be picked anymore during round
         removedCards.Add(card);
         currentDeck.Remove(card);
         currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
@@ -96,6 +100,7 @@ public class CardSpawner : MonoBehaviour
     {
         GameManager.ResetPlayer();
 
+        //On New round move all current card up to leave space on bottom to last removed cards
         foreach (var obj in currentDeck)
         {
             obj.transform.position += Vector3.up * (offsetY * removedCards.Count);
@@ -112,13 +117,16 @@ public class CardSpawner : MonoBehaviour
             obj.layer = 0;
         }
         removedCards.Clear();
-        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
+
+
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");//Set layer on new top card
 
         GameManager.NewRoundCallback?.Invoke();
     }
 
     public void OnFinishRound()
     {
+        //Show all players hide cards
         foreach (var obj in removedCards)
         {
             if (obj.transform.eulerAngles.x == 90f)

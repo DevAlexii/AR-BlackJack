@@ -26,6 +26,7 @@ public class SoundManager : MonoBehaviour
 
     public SoundManager()
     {
+        //Fake Singleton
         if (self == null)
         {
             self = this;
@@ -36,11 +37,11 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void PlayClip(ClipType type = ClipType.None)
+    public void PlayClip(ClipType type = ClipType.None) //Play clip given a type
     {
         if (clipSource.isPlaying)
         {
-            clipSource.Stop();
+            clipSource.Stop(); // stop play clip source if user is spam click with sound
         }
 
         switch (type)

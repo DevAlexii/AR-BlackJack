@@ -9,6 +9,7 @@ public class AIManager : MonoBehaviour
 
     void Start()
     {
+        //Binding Callbacks
         GameManager.ReducePendingPlayersCallback += ReducePendingPlayer;
         GameManager.ResetPendingPlayersCallback += ResetPendingPlayers;
         GameManager.AIStateUpdateCallback += OnStateUpdate;

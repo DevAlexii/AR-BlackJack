@@ -2,12 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DealerController : MonoBehaviour
+public class DealerController : BasePlayer
 {
-    //Card Position
-    [SerializeField]
-    Transform cardPoint;
-
     //UI Reference
     [SerializeField]
     GameObject chooseWinnerBtn;
@@ -26,10 +22,7 @@ public class DealerController : MonoBehaviour
     private Vector3 lastPosCard;
 
     //Delear Info
-    private bool myTurn = true;
-    int receivedCards = 0;
     bool startDraw = true;
-    int currentNumCard;
     bool canSelectWinner;
 
     //VFX 
@@ -37,7 +30,7 @@ public class DealerController : MonoBehaviour
     private GameObject[] selectionVFX;// 0=>Winner vfx,1=>Loser vfx
     private GameObject spawnedVFX;
 
-    private void Start()
+    protected override void Start()
     {
         GameManager.StartGameCallback += OnStartGame;
         GameManager.ChangeTurnCallback += OnChangeTurn;
@@ -48,6 +41,9 @@ public class DealerController : MonoBehaviour
         chooseWinnerBtn.GetComponent<Button>().onClick.AddListener(OnChooseWinnerClick);
         colliderRef = GetComponent<Collider>();
         colliderRef.enabled = false;
+        playerName = "Player";
+        isDelear = true;
+        base.Start();
     }
 
     private void OnEnableChooseWinenr()
@@ -63,16 +59,15 @@ public class DealerController : MonoBehaviour
 
     private void OnStartGame()
     {
-        colliderRef.enabled = false;
+        GameManager.ResetPlayer();
         isDragging = false;
         draggedCard = null;
         myTurn = true;
         receivedCards = 0;
         startDraw = true;
-        currentNumCard = 0;
-        GameManager.UpdatePlayer("Player", currentNumCard);
+        cardsSum = 0;
+        GameManager.UpdatePlayer("Player", cardsSum);
         chooseWinnerBtn.SetActive(false);
-        GameManager.ResetPlayer();
         colliderRef.enabled = false;
         Destroy(spawnedVFX);
         StopAllCoroutines();
@@ -81,7 +76,7 @@ public class DealerController : MonoBehaviour
     void Update()
     {
         if (!myTurn) return;
-        if (canSelectWinner && Input.GetMouseButtonUp(0))
+        if (canSelectWinner && Input.GetMouseButtonDown(0))
         {
             WinnerTrace();
             return;
@@ -125,7 +120,7 @@ public class DealerController : MonoBehaviour
                 }
                 else
                 {
-                    name = hit.transform.GetComponent<AI>().AIName;
+                    name = hit.transform.GetComponent<BasePlayer>().PlayerName;
                 }
 
                 bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
@@ -148,10 +143,20 @@ public class DealerController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        int layerMask = 1 << LayerMask.NameToLayer("Card");
+        int layerMask = 1 << LayerMask.NameToLayer("Card") | 1 << LayerMask.NameToLayer("Player");
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
+            {
+                Vector3 playerPos = hit.transform.position + hit.transform.forward * 1f;
+                if (hit.transform.GetComponent<AI>())
+                {
+                    PlayerCardsDebugger.Instance.DebuggerShowPopUp(hit.transform.GetComponent<BasePlayer>().PlayerName, playerPos, hit.transform.GetComponent<AI>().State.ToString());
+                }
+                return;
+            }
+
             draggedCard = hit.collider.gameObject;
             isDragging = true;
             lastPosCard = draggedCard.transform.position;
@@ -230,48 +235,19 @@ public class DealerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        HandleCard(other);
-        SoundManager.self.PlayClip(ClipType.PlayCard);
+        if (cardsSum < 21)
+        {
+            HandleCard(other);
+            SoundManager.self.PlayClip(ClipType.PlayCard);
+        }
     }
 
-    private void HandleCard(Collider other)
+    protected override void HandleCard(Collider other)
     {
-        draggedCard.gameObject.layer = 0;
-        ++receivedCards;
+        base.HandleCard(other);
+        other.gameObject.layer = 0;
         isDragging = false;
-        StartCoroutine(CardAnimation(.25f));
         colliderRef.enabled = !(receivedCards > 1 && startDraw);
-        if (draggedCard.TryGetComponent<CardInfo>(out CardInfo cardInfo))
-        {
-            currentNumCard += cardInfo.Value;
-            GameManager.UpdatePlayer("Player", currentNumCard);
-        }
-    }
-
-    IEnumerator CardAnimation(float duration)
-    {
-        Vector3 startPos = draggedCard.transform.position;
-        Vector3 endPos = cardPoint.position +
-                         Vector3.up * .001f * (receivedCards - 1) +
-                         -Vector3.right * .05f * (receivedCards - 1);
-        Quaternion startRot = draggedCard.transform.rotation;
-        Vector3 eulerRot = cardPoint.eulerAngles + new Vector3(180, 0, 0);
-        Quaternion targetRot = Quaternion.Euler(eulerRot);
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            float alpha = elapsedTime / duration;
-
-            draggedCard.transform.position = Vector3.Slerp(startPos, endPos, alpha);
-            draggedCard.transform.rotation = Quaternion.Slerp(startRot, targetRot, alpha);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-        draggedCard.transform.position = endPos;
-        GameManager.StopDragPlayerCallback(draggedCard);
-
         if (receivedCards > 1 && startDraw)
         {
             startDraw = false;
