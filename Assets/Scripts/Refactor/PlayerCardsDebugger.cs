@@ -44,6 +44,16 @@ public class PlayerCardsDebugger : MonoBehaviour
             players.Clear();
         };
 
+        GameManager.StartGameCallback += () =>
+        {
+            DebuggerUI.SetActive(false);
+        };
+
+        GameManager.NewRoundCallback += () =>
+        {
+            DebuggerUI.SetActive(false);
+        };
+
         DebuggerUI.SetActive(false);
     }
 
@@ -54,6 +64,7 @@ public class PlayerCardsDebugger : MonoBehaviour
 
     public void DebuggerShowPopUp(string inName,Vector3 playerPos,string inState)
     {
+        DebuggerUI.SetActive(false);
         transform.position = playerPos + Vector3.up * .5f;
         DebuggerUI.SetActive(true);
         DebuggerUI.GetComponent<PlayerDebuggerInfo>().UpdateUI(DebuggerGetPlayerInfo(inName, inState));

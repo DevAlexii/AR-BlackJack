@@ -983,7 +983,7 @@ Transform:
   m_GameObject: {fileID: 284133369}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.129, y: 0.768, z: 0.453}
+  m_LocalPosition: {x: 0.007, y: 0.768, z: 0.453}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1708,7 +1708,7 @@ Transform:
   m_GameObject: {fileID: 553447146}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -2.669, y: 0.677, z: 2.234}
+  m_LocalPosition: {x: -2.479, y: 0.677, z: 2.262}
   m_LocalScale: {x: 0.33, y: 0.33, z: 0.33}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -5751,7 +5751,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPoint: {fileID: 284133370}
   cardAnimationTime: 0.5
-  rightOffset: 0.025
+  rightOffset: 0.05
   chooseWinnerBtn: {fileID: 1735835027}
   startNewRoundBtn: {fileID: 133177964}
   dragOffsetY: 0.02
