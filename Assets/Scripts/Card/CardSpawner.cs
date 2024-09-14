@@ -16,10 +16,10 @@ public class CardSpawner : MonoBehaviour
 
 
     //TextureOffset Setting
-    private float tileOffsetX = .137f;
-    private float tileOffsetY = .51f;
-    private float startTileOffsetX = -0.32f;
-    private float startTileOffsetY = -0.37f;
+    private float tileOffsetX = .1415f;
+    private float tileOffsetY = .5f;
+    private float startTileOffsetX = .685f;
+    private float startTileOffsetY = .571f;
 
     private void Start()
     {
@@ -75,10 +75,13 @@ public class CardSpawner : MonoBehaviour
                 card.Init(cardValue);
             }
         }
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
     }
     public void ShuffleCards()
     {
+        currentDeck[currentDeck.Count - 1].layer = 0;
         CustomLibrary.Shuffle(ref currentDeck);
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
         SoundManager.self.PlayClip(ClipType.Shuffle);
     }
 
@@ -86,6 +89,7 @@ public class CardSpawner : MonoBehaviour
     {
         removedCards.Add(card);
         currentDeck.Remove(card);
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
     }
 
     public void StartNewRound()
@@ -95,6 +99,7 @@ public class CardSpawner : MonoBehaviour
         foreach (var obj in currentDeck)
         {
             obj.transform.position += Vector3.up * (offsetY * removedCards.Count);
+            obj.layer = 0;
         }
 
         for (int i = 0; i < removedCards.Count; i++)
@@ -103,7 +108,11 @@ public class CardSpawner : MonoBehaviour
             currentDeck.Add(obj);
             obj.transform.position = transform.position + Vector3.up * (i * offsetY);
             obj.transform.rotation = Quaternion.Euler(-90,0,0);
+            obj.layer = 0;
         }
         removedCards.Clear();
+        currentDeck[currentDeck.Count - 1].layer = LayerMask.NameToLayer("Card");
+
+        GameManager.NewRoundCallback?.Invoke();
     }
 }

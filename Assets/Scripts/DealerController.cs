@@ -44,6 +44,7 @@ public class DealerController : MonoBehaviour
         GameManager.StopDragPlayerCallback += OnForceStopDrag;
         GameManager.DelearReceiverCallback += OnDelearReceiver;
         GameManager.EnableChooseWinnerCallback += OnEnableChooseWinenr;
+        GameManager.NewRoundCallback += OnStartGame;
         chooseWinnerBtn.GetComponent<Button>().onClick.AddListener(OnChooseWinnerClick);
         colliderRef = GetComponent<Collider>();
         colliderRef.enabled = false;
@@ -72,6 +73,7 @@ public class DealerController : MonoBehaviour
         GameManager.UpdatePlayer("Player", currentNumCard);
         chooseWinnerBtn.SetActive(false);
         GameManager.ResetPlayer();
+        colliderRef.enabled = false;
         Destroy(spawnedVFX);
         StopAllCoroutines();
     }
@@ -131,8 +133,12 @@ public class DealerController : MonoBehaviour
                 spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
                 SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
 
-                hit.transform.GetComponent<Animator>().SetTrigger("Winner");
-                hit.transform.GetComponent<Animator>().SetBool("RandomWinner", Random.Range(0, 2) == 0);
+                Animator anim = hit.transform.GetComponent<Animator>();
+                if (anim)
+                {
+                    anim.SetTrigger("Winner");
+                    anim.SetBool("RandomWinner", Random.Range(0, 2) == 0);
+                }
             }
         }
     }
@@ -229,10 +235,10 @@ public class DealerController : MonoBehaviour
 
     private void HandleCard(Collider other)
     {
-        other.gameObject.layer = 0;
+        draggedCard.gameObject.layer = 0;
         ++receivedCards;
         isDragging = false;
-        StartCoroutine(CardAnimation(.5f));
+        StartCoroutine(CardAnimation(.25f));
         colliderRef.enabled = !(receivedCards > 1 && startDraw);
         if (draggedCard.TryGetComponent<CardInfo>(out CardInfo cardInfo))
         {
@@ -245,7 +251,7 @@ public class DealerController : MonoBehaviour
     {
         Vector3 startPos = draggedCard.transform.position;
         Vector3 endPos = cardPoint.position +
-                         Vector3.up * .0005f * (receivedCards - 1) +
+                         Vector3.up * .001f * (receivedCards - 1) +
                          -Vector3.right * .05f * (receivedCards - 1);
         Quaternion startRot = draggedCard.transform.rotation;
         Vector3 eulerRot = cardPoint.eulerAngles + new Vector3(180, 0, 0);

@@ -8,6 +8,6 @@ public class CardInfo : MonoBehaviour
 
     public void Init(int InValue)
     {
-        value = InValue;
+        value = InValue + 1; //+1 cause spawn iterator start count from 0
     }
 }

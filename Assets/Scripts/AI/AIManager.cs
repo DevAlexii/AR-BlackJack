@@ -12,14 +12,20 @@ public class AIManager : MonoBehaviour
         GameManager.ReducePendingPlayersCallback += ReducePendingPlayer;
         GameManager.ResetPendingPlayersCallback += ResetPendingPlayers;
         GameManager.AIStateUpdateCallback += OnStateUpdate;
+        GameManager.NewRoundCallback += () =>
+        {
+            ResetPendingPlayers(startPendingPlayers);
+        };
     }
     private void ReducePendingPlayer()
     {
         pendingPlayers--;
+
         if (pendingPlayers == 0)
         {
             pendingPlayers = startPendingPlayers;
             playerStates = startPendingPlayers;
+
             if (startRound)
             {
                 GameManager.DelearReceiverCallback?.Invoke();

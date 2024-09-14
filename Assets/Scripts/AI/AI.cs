@@ -82,12 +82,22 @@ public class AI : MonoBehaviour
     private void Start()
     {
         GameManager.ChangeTurnCallback += OnChangeTurn;
+        GameManager.NewRoundCallback += OnNewRound;
         State = AIState.Hit;
         aiName = "AI" + Random.Range(1, 10000);
         GameManager.UpdatePlayer(AIName, currentSumCardValues);
         nameTXT.text = AIName;
-
     }
+    private void OnNewRound()
+    {
+        myTurn = false;
+        State = AIState.Hit;
+        receivedCard = 0;
+        cardRef = null;
+        currentSumCardValues = 0;
+        valueTxt.text = "CurrentValue:";
+    }
+
     private void OnChangeTurn(bool inDealerTurn)
     {
         myTurn = !inDealerTurn;

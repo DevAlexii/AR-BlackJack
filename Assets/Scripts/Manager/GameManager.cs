@@ -13,6 +13,7 @@ public static class GameManager
     public static Action<bool> AIStateUpdateCallback;
     public static Action DelearReceiverCallback;
     public static Action EnableChooseWinnerCallback;
+    public static Action NewRoundCallback;
 
     static Dictionary<string, int> players = new Dictionary<string, int>();
 
