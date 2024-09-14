@@ -56,6 +56,7 @@ public class AI : MonoBehaviour
                     break;
                 case AIState.Hit:
                     stateTxt.text = "State:Hit";
+                    anim.SetBool("RandomWinner", Random.Range(0,2) == 0);
                     anim.SetTrigger("Hit");
                     break;
                 case AIState.Bust:

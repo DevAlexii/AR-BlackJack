@@ -163,7 +163,8 @@ public class DealerController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPosition;
-        int layerMask = ~((1 << LayerMask.NameToLayer("Card")) | (1 << LayerMask.NameToLayer("Player")));
+        //int layerMask = ~((1 << LayerMask.NameToLayer("Card")) | (1 << LayerMask.NameToLayer("Player")));
+        int layerMask = LayerMask.NameToLayer("Table");
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
@@ -171,7 +172,7 @@ public class DealerController : MonoBehaviour
         }
         else
         {
-            targetPosition = ray.origin + ray.direction * 5f;
+            targetPosition = ray.origin + ray.direction * 2.5f;
         }
         draggedCard.transform.position = Vector3.Lerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 5f);
     }

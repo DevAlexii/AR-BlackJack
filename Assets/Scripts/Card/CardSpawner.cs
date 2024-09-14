@@ -102,10 +102,11 @@ public class CardSpawner : MonoBehaviour
             obj.layer = 0;
         }
 
+
         for (int i = 0; i < removedCards.Count; i++)
         {
             GameObject obj = removedCards[i];
-            currentDeck.Add(obj);
+            currentDeck.Insert(i,obj);
             obj.transform.position = transform.position + Vector3.up * (i * offsetY);
             obj.transform.rotation = Quaternion.Euler(-90,0,0);
             obj.layer = 0;
