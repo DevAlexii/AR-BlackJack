@@ -28,7 +28,11 @@ public class BasePlayer : MonoBehaviour
     protected virtual void Start()
     {
         GameManager.UpdatePlayer(playerName, cardsSum);
+        GameManager.NewRoundCallback += OnNewRound;
+        GameManager.ChangeTurnCallback += OnChangeTurn;
     }
+    protected virtual void OnNewRound() { }
+    protected virtual void OnChangeTurn(bool inDelearTurn) { }
 
     protected virtual void HandleCard(Collider other)
     {

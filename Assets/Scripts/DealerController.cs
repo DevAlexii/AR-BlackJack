@@ -33,11 +33,9 @@ public class DealerController : BasePlayer
     protected override void Start()
     {
         GameManager.StartGameCallback += OnStartGame;
-        GameManager.ChangeTurnCallback += OnChangeTurn;
         GameManager.StopDragPlayerCallback += OnForceStopDrag;
         GameManager.DelearReceiverCallback += OnDelearReceiver;
         GameManager.EnableChooseWinnerCallback += OnEnableChooseWinenr;
-        GameManager.NewRoundCallback += OnStartGame;
         GameManager.GameOverCallback += () =>
         {
             chooseWinnerBtn.SetActive(false);
@@ -53,7 +51,10 @@ public class DealerController : BasePlayer
         fadingCardObj.SetActive(false);
         base.Start();
     }
-
+    protected override void OnNewRound()
+    {
+        OnStartGame();
+    }
     private void OnEnableChooseWinenr()
     {
         chooseWinnerBtn.SetActive(true);
@@ -193,7 +194,7 @@ public class DealerController : BasePlayer
 
     void StopDrag()
     {
-        if (isDragging)
+        if (isDragging && draggedCard)
         {
             StartCoroutine(ResetCardCoroutine(releaseCardTimer));
             isDragging = false;
@@ -217,7 +218,7 @@ public class DealerController : BasePlayer
         draggedCard = null;
     }
 
-    private void OnChangeTurn(bool InDealerTurn)
+    protected override void OnChangeTurn(bool InDealerTurn)
     {
         myTurn = InDealerTurn;
 

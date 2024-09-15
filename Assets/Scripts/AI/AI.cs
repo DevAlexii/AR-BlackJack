@@ -46,13 +46,11 @@ public class AI : BasePlayer
     protected override void Start()
     {
         anim = GetComponent<Animator>();
-        GameManager.ChangeTurnCallback += OnChangeTurn;
-        GameManager.NewRoundCallback += OnNewRound;
         State = AIState.Hit;
         playerName = "AI" + Random.Range(1, 10000);
         base.Start();
     }
-    private void OnNewRound()
+    protected override void OnNewRound()
     {
         myTurn = false;
         State = AIState.Hit;
@@ -60,7 +58,7 @@ public class AI : BasePlayer
         cardsSum = 0;
     }
 
-    private void OnChangeTurn(bool inDealerTurn)
+    protected override void OnChangeTurn(bool inDealerTurn)
     {
         myTurn = !inDealerTurn;
     }
