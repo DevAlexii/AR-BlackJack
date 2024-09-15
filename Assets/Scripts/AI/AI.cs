@@ -50,6 +50,7 @@ public class AI : BasePlayer
         playerName = "AI" + Random.Range(1, 10000);
         base.Start();
     }
+    
     protected override void OnNewRound()
     {
         myTurn = false;

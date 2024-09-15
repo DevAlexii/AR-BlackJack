@@ -72,4 +72,10 @@ public class BasePlayer : MonoBehaviour
     }
 
     public virtual string GetState() { return ""; }
+
+    private void OnDestroy()
+    {
+        GameManager.NewRoundCallback -= OnNewRound;
+        GameManager.ChangeTurnCallback -= OnChangeTurn;
+    }
 }
