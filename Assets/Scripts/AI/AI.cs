@@ -20,6 +20,7 @@ public class AI : BasePlayer
         set
         {
             state = value;
+            fadingCardObj.SetActive(state == AIState.Hit);
             if (!anim) return;
 
             switch (state)
@@ -42,7 +43,6 @@ public class AI : BasePlayer
         }
     }
     private Animator anim;
-
     protected override void Start()
     {
         anim = GetComponent<Animator>();

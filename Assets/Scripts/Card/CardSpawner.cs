@@ -129,7 +129,7 @@ public class CardSpawner : MonoBehaviour
         //Show all players hide cards
         foreach (var obj in removedCards)
         {
-            if (obj.transform.eulerAngles.x == 90f)
+            if (obj.transform.eulerAngles.x <= 90f)
             {
                 obj.transform.eulerAngles += new Vector3(180, 0, 0);
             }

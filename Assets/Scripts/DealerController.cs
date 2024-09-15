@@ -43,12 +43,14 @@ public class DealerController : BasePlayer
             chooseWinnerBtn.SetActive(false);
             startNewRoundBtn.SetActive(false);
             chooseWinnerBtn.transform.parent.gameObject.SetActive(false);
+            fadingCardObj.SetActive(false);
         };
         chooseWinnerBtn.GetComponent<Button>().onClick.AddListener(OnChooseWinnerClick);
         colliderRef = GetComponent<Collider>();
         colliderRef.enabled = false;
         playerName = "Player";
         isDelear = true;
+        fadingCardObj.SetActive(false);
         base.Start();
     }
 
@@ -77,6 +79,7 @@ public class DealerController : BasePlayer
         colliderRef.enabled = false;
         Destroy(spawnedVFX);
         StopAllCoroutines();
+        fadingCardObj.SetActive(false);
     }
 
     void Update()
@@ -129,7 +132,7 @@ public class DealerController : BasePlayer
                 }
 
                 bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
-                GameManager.AddHappinessCallback?.Invoke(correctSelection?.25f:-.25f);
+                GameManager.AddHappinessCallback?.Invoke(correctSelection ? .25f : -.25f);
                 int index = correctSelection ? 0 : 1;
                 spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
                 SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
@@ -236,6 +239,7 @@ public class DealerController : BasePlayer
     private void OnDelearReceiver()
     {
         colliderRef.enabled = !colliderRef.enabled;
+        fadingCardObj.SetActive(colliderRef.enabled && cardsSum < 21);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -256,7 +260,12 @@ public class DealerController : BasePlayer
         if (receivedCards > 1 && startDraw)
         {
             startDraw = false;
+            fadingCardObj.SetActive(false);
             GameManager.ChangeTurnCallback?.Invoke(false);
+        }
+        if (cardsSum >= 21)
+        {
+            fadingCardObj.SetActive(false);
         }
     }
 }

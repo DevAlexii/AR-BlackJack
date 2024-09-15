@@ -12,6 +12,8 @@ public class BasePlayer : MonoBehaviour
     [SerializeField]
     protected float rightOffset = .2f;
     protected float upOffset = .001f;
+    [SerializeField]
+    protected GameObject fadingCardObj;
 
     //Card Info
     protected int receivedCards = 0;
