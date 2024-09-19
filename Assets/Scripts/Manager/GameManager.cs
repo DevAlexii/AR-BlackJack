@@ -16,6 +16,7 @@ public static class GameManager
     public static Action NewRoundCallback;
     public static Action<float> AddHappinessCallback;
     public static Action GameOverCallback;
+    public static Action<GameObject> ThrowCardCallback;
 
     static Dictionary<string, int> players = new Dictionary<string, int>();
 
@@ -27,26 +28,67 @@ public static class GameManager
     {
         //Add/Update player in scene 
         players[inPlayerName] = inPlayerCardNum;
-        PlayerCardsDebugger.Instance.DebuggerUpdatePlayerStat(inPlayerName,inPlayerCardNum);
+        PlayerCardsDebugger.Instance.DebuggerUpdatePlayerStat(inPlayerName, inPlayerCardNum);
     }
 
-    public static bool IsCorrectPlayerToWin(string inPlayerName)
+    public static bool IsCorrectPlayerToWin(List<string> inPlayerName)
     {
         //Check if selected player is a winner by is cardsSum value
         //If there are 2 or more player with same value, it is not managed according black jack rule, first found in the dictionary is the winner
 
-        string winnerName = "";
-        int highValue = 0;
-        foreach (var name in players.Keys)
+        //string winnerName = "";
+        //int highValue = 0;
+        //foreach (var name in players.Keys)
+        //{
+        //    int currentValue = players[name];
+        //    if (currentValue <= 21 && currentValue > highValue)
+        //    {
+        //        highValue = currentValue;
+        //        winnerName = name;
+        //    }
+        //}
+
+        foreach (var name in winnersList)
         {
-            int currentValue = players[name];
-            if (currentValue <= 21 && currentValue > highValue)
+            if (!inPlayerName.Contains(name))
             {
-                highValue = currentValue;
-                winnerName = name;
+                return false;
             }
         }
-
-        return winnerName == inPlayerName;
+        return true;
     }
+
+    static List<string> winnersList = new List<string>();
+    public static void UpdateWinnerList()
+    {
+        CalculateMax();
+        winnersList.Clear(); 
+
+        foreach (var key in players.Keys)
+        {
+            int currentValue = players[key];
+
+            if (currentValue >= maxValue && currentValue <= 21)
+            {
+                winnersList.Add(key);
+            }
+        }
+    }
+
+    static int maxValue;
+    private static void CalculateMax()
+    {
+        maxValue = 0;
+        foreach (var key in players.Keys)
+        {
+            int currentValue = players[key];
+
+            if (maxValue < currentValue && currentValue <= 21)
+            {
+                maxValue = currentValue;
+            }
+        }
+    }
+
+    public static int GetWinnersAmount() => winnersList.Count;
 }

@@ -24,6 +24,7 @@ public class CardSpawner : MonoBehaviour
     {
         GameManager.StartGameCallback += Init;
         GameManager.StopDragPlayerCallback += RemoveCardFromDeck;
+        GameManager.ThrowCardCallback += RemoveCardFromDeck;
     }
 
     private void Init()
@@ -55,7 +56,7 @@ public class CardSpawner : MonoBehaviour
             Vector3 pos = transform.position + Vector3.up * (i * offsetY);
 
             //Instantiate new game object and store it in the array
-            GameObject obj = Instantiate(cardsType[cardIndex - 1], pos, Quaternion.Euler(90,0,0), transform);
+            GameObject obj = Instantiate(cardsType[cardIndex - 1], pos, Quaternion.Euler(90, 0, 0), transform);
             originalDeck[i] = obj;
             currentDeck.Add(obj);
 
@@ -115,6 +116,10 @@ public class CardSpawner : MonoBehaviour
             obj.transform.position = transform.position + Vector3.up * (i * offsetY);
             obj.transform.rotation = Quaternion.Euler(90, 0, 0);
             obj.layer = 0;
+            if (obj.TryGetComponent<Rigidbody>(out Rigidbody rb))
+            {
+                Destroy(rb);
+            }
         }
         removedCards.Clear();
 
@@ -134,5 +139,6 @@ public class CardSpawner : MonoBehaviour
                 obj.transform.eulerAngles += new Vector3(180, 0, 0);
             }
         }
+        GameManager.UpdateWinnerList();
     }
 }

@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +32,10 @@ public class DealerController : BasePlayer
     private GameObject[] selectionVFX;// 0=>Winner vfx,1=>Loser vfx
     private GameObject spawnedVFX;
 
+    //Popup
+    [SerializeField]
+    GameObject popupDealer;
+
     protected override void Start()
     {
         GameManager.StartGameCallback += OnStartGame;
@@ -49,6 +55,7 @@ public class DealerController : BasePlayer
         playerName = "Player";
         isDelear = true;
         fadingCardObj.SetActive(false);
+        winnerSelected.Clear();
         base.Start();
     }
     protected override void OnNewRound()
@@ -64,10 +71,12 @@ public class DealerController : BasePlayer
     {
         chooseWinnerBtn.SetActive(false);
         canSelectWinner = true;
+        fadingCardObj.SetActive(false);
     }
 
     private void OnStartGame()
     {
+        hasAce = false;
         GameManager.ResetPlayer();
         isDragging = false;
         draggedCard = null;
@@ -81,6 +90,8 @@ public class DealerController : BasePlayer
         Destroy(spawnedVFX);
         StopAllCoroutines();
         fadingCardObj.SetActive(false);
+        winnerSelected.Clear();
+        DisablePopupDelear();
     }
 
     void Update()
@@ -110,6 +121,8 @@ public class DealerController : BasePlayer
         }
 
     }
+
+    List<string> winnerSelected = new List<string>();
     private void WinnerTrace()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -119,30 +132,28 @@ public class DealerController : BasePlayer
         {
             if (hit.collider.gameObject.tag == "AI")
             {
-                startNewRoundBtn.SetActive(true);
-                canSelectWinner = false;
+                string name = hit.transform.GetComponent<BasePlayer>().PlayerName;
+                winnerSelected.Add(name);
 
-                string name;
-                if (hit.transform.gameObject == gameObject)
+                if (winnerSelected.Count >= GameManager.GetWinnersAmount())
                 {
-                    name = "Player";
-                }
-                else
-                {
-                    name = hit.transform.GetComponent<BasePlayer>().PlayerName;
-                }
+                    startNewRoundBtn.SetActive(true);
+                    canSelectWinner = false;
 
-                bool correctSelection = GameManager.IsCorrectPlayerToWin(name);
-                GameManager.AddHappinessCallback?.Invoke(correctSelection ? .25f : -.25f);
-                int index = correctSelection ? 0 : 1;
-                spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
-                SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
 
-                Animator anim = hit.transform.GetComponent<Animator>();
-                if (anim)
-                {
-                    anim.SetTrigger("Winner");
-                    anim.SetBool("RandomWinner", Random.Range(0, 2) == 0);
+                    bool correctSelection = GameManager.IsCorrectPlayerToWin(winnerSelected);
+
+                    GameManager.AddHappinessCallback?.Invoke(correctSelection ? .25f : -.25f);
+                    int index = correctSelection ? 0 : 1;
+                    spawnedVFX = Instantiate(selectionVFX[index], hit.transform.position, Quaternion.Euler(-90, 0, 0), hit.transform);
+                    SoundManager.self.PlayClip(correctSelection ? ClipType.Winner : ClipType.Loser);
+
+                    Animator anim = hit.transform.GetComponent<Animator>();
+                    if (anim)
+                    {
+                        anim.SetTrigger("Winner");
+                        anim.SetBool("RandomWinner", Random.Range(0, 2) == 0);
+                    }
                 }
             }
         }
@@ -192,12 +203,29 @@ public class DealerController : BasePlayer
         draggedCard.transform.position = Vector3.Slerp(draggedCard.transform.position, targetPosition, Time.deltaTime * 8f);
     }
 
+    [SerializeField]
+    float force;
     void StopDrag()
     {
         if (isDragging && draggedCard)
         {
-            StartCoroutine(ResetCardCoroutine(releaseCardTimer));
+            //StartCoroutine(ResetCardCoroutine(releaseCardTimer));
             isDragging = false;
+
+            Rigidbody rb = draggedCard.GetComponent<Rigidbody>();
+            if (!rb)
+            {
+                rb = draggedCard.AddComponent<Rigidbody>();
+            }
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Vector3 starPos = ray.origin + (ray.direction * 2.0f);
+            Vector3 dir = (starPos - transform.position) + Vector3.up;
+            dir.Normalize();
+
+            rb.AddForce(dir * force);
+
+            GameManager.ThrowCardCallback?.Invoke(draggedCard);
+            draggedCard = null;
         }
     }
 
@@ -241,6 +269,18 @@ public class DealerController : BasePlayer
     {
         colliderRef.enabled = !colliderRef.enabled;
         fadingCardObj.SetActive(colliderRef.enabled && cardsSum < 21);
+
+        if (colliderRef.enabled && !startDraw)
+        {
+            string txtPopup = cardsSum >= 16 ? "Dont draw card" : "Draw card";
+            popupDealer.GetComponentInChildren<TMP_Text>().text = txtPopup;
+            popupDealer.SetActive(true);
+            Invoke(nameof(DisablePopupDelear), 1f);
+        }
+    }
+    private void DisablePopupDelear()
+    {
+        popupDealer.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -264,6 +304,7 @@ public class DealerController : BasePlayer
             fadingCardObj.SetActive(false);
             GameManager.ChangeTurnCallback?.Invoke(false);
         }
+
         if (cardsSum >= 21)
         {
             fadingCardObj.SetActive(false);

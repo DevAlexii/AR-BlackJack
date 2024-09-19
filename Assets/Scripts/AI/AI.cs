@@ -57,6 +57,7 @@ public class AI : BasePlayer
         State = AIState.Hit;
         receivedCards = 0;
         cardsSum = 0;
+        hasAce = false;
     }
 
     protected override void OnChangeTurn(bool inDealerTurn)

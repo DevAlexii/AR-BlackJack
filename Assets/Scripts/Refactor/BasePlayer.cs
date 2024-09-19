@@ -18,6 +18,7 @@ public class BasePlayer : MonoBehaviour
     //Card Info
     protected int receivedCards = 0;
     protected int cardsSum = 0;
+    protected bool hasAce;
 
     //PlayerInfo
     protected bool isDelear = false;
@@ -30,6 +31,7 @@ public class BasePlayer : MonoBehaviour
         GameManager.UpdatePlayer(playerName, cardsSum);
         GameManager.NewRoundCallback += OnNewRound;
         GameManager.ChangeTurnCallback += OnChangeTurn;
+        hasAce = false;
     }
     protected virtual void OnNewRound() { }
     protected virtual void OnChangeTurn(bool inDelearTurn) { }
@@ -41,10 +43,20 @@ public class BasePlayer : MonoBehaviour
         StartCoroutine(CardAnimation(cardAnimationTime,other.gameObject));
         if (other.TryGetComponent<CardInfo>(out CardInfo card))
         {
+            if(!hasAce && card.Value == 11)
+            {
+                hasAce = true;
+            }
             cardsSum += card.Value;
+            if(cardsSum > 21 && hasAce)
+            {
+                cardsSum -= 10;
+                hasAce = false;
+            }
         }
         GameManager.UpdatePlayer(playerName, cardsSum);
         SoundManager.self.PlayClip(ClipType.PlayCard);
+        Destroy(other.GetComponent<Rigidbody>());
     }
     IEnumerator CardAnimation(float duration,GameObject obj)
     {
