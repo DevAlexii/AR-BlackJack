@@ -219,9 +219,8 @@ public class DealerController : BasePlayer
             }
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Vector3 starPos = ray.origin + (ray.direction * 2.0f);
-            Vector3 dir = (starPos - transform.position) + Vector3.up;
+            Vector3 dir = (starPos - lastPosCard) + Vector3.up;
             dir.Normalize();
-
             rb.AddForce(dir * force);
 
             GameManager.ThrowCardCallback?.Invoke(draggedCard);
